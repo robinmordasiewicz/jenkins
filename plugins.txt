@@ -7,6 +7,7 @@ cloudbees-folder:latest
 command-launcher:1.6
 configuration-as-code:latest
 email-ext:latest
+generic-webhook-trigger:latest
 git:latest
 github-branch-source:latest
 gradle:latest
