@@ -10,5 +10,5 @@ echo "${JENKINS_VERSION}-${LOCALREVISION}" > VERSION
 
 cat Dockerfile | sed -re "s/ENV JENKINS_VERSION.*/ENV JENKINS_VERSION ${JENKINS_VERSION}-${LOCALREVISION}/" > Dockerfile.tmp && mv Dockerfile.tmp Dockerfile
 
-cat build.sh | sed -re "s/[0-9]*\.[0-9]*\.[0-9]*-[0-9]*/jenkins:${JENKINS_VERSION}-${LOCALREVISION}/" > build.sh.tmp && mv build.sh.tmp build.sh
+cat build.sh | sed -re "s/[0-9]*\.[0-9]*\.[0-9]*-[0-9]*/${JENKINS_VERSION}-${LOCALREVISION}/" > build.sh.tmp && mv build.sh.tmp build.sh
 
