@@ -19,6 +19,7 @@ kubernetes-cli:latest
 kubernetes-client-api:latest
 kubernetes:latest
 ldap:latest
+login-theme:1.1
 mailer:latest
 matrix-auth:latest
 pam-auth:latest
