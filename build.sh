@@ -1,5 +1,12 @@
 #!/bin/bash
 #
 
-docker build -t robinhoodis/jenkins:2.341-46 .
-docker push robinhoodis/jenkins:2.341-46
+set -e
+
+VERSION=`cat VERSION`
+
+docker build -t robinhoodis/jenkins:${VERSION} .
+docker push robinhoodis/jenkins:${VERSION}
+
+docker build -t robinhoodis/jenkins:latest .
+docker push robinhoodis/jenkins:latest
