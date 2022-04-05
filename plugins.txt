@@ -22,6 +22,7 @@ ldap:latest
 login-theme:1.1
 mailer:latest
 matrix-auth:latest
+matrix-project:758.v7a_ea_491852f3
 naginator:latest
 pam-auth:latest
 pipeline-github-lib:latest
