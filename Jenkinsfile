@@ -36,13 +36,6 @@ pipeline {
     }
   }
   stages {
-    stage('bump container version') {
-      steps {
-        container('ubuntu') {
-          sh "sh increment-version.sh"
-        }
-      }
-    }
     stage('build container') {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
@@ -57,29 +50,14 @@ pipeline {
         }
       }
     }
-    stage('commit container version') {
-      steps {
-        dir ( 'jenkins-container' ) {
-          sh 'git config user.email "robin@mordasiewicz.com"'
-          sh 'git config user.name "Robin Mordasiewicz"'
-          sh 'git add .'
-          sh 'git tag `cat VERSION`'
-          sh 'git commit -m "`cat VERSION`"'
-          withCredentials([gitUsernamePassword(credentialsId: 'github-pat', gitToolName: 'git')]) {
-            sh '/usr/bin/git push origin main'
-            sh '/usr/bin/git push origin `cat VERSION`'
-          }
-        }
-      }
-    }
     stage('commit chart') {
       steps {
-        sh 'mkdir -p helm-charts-pipeline'
-        dir ( 'helm-charts-pipeline' ) {
-          git branch: 'main', url: 'https://github.com/robinmordasiewicz/helm-charts-pipeline.git'
+        sh 'mkdir -p helm-charts'
+        dir ( 'helm-charts' ) {
+          git branch: 'main', url: 'https://github.com/robinmordasiewicz/helm-charts.git'
         }
-        sh 'cp jenkins-container/VERSION helm-charts-pipeline/VERSION.container'
-        dir ( 'helm-charts-pipeline' ) {
+        sh 'cp VERSION helm-charts/VERSION.container'
+        dir ( 'helm-charts' ) {
           sh 'git config user.email "robin@mordasiewicz.com"'
           sh 'git config user.name "Robin Mordasiewicz"'
           sh 'git add .'
