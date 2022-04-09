@@ -44,7 +44,8 @@ pipeline {
             /kaniko/executor --dockerfile `pwd`/Dockerfile \
                              --context `pwd` \
                              --destination=robinhoodis/jenkins:`cat VERSION` \
-                             --destination=robinhoodis/jenkins:latest
+                             --destination=robinhoodis/jenkins:latest \
+                             --cache=true
             '''
           }
         }
