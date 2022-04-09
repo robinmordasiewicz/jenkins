@@ -62,7 +62,7 @@ pipeline {
           sh 'git config user.email "robin@mordasiewicz.com"'
           sh 'git config user.name "Robin Mordasiewicz"'
           sh 'git add .'
-          sh 'git diff --quiet && git diff --staged --quiet || git commit -am "Jenkins Container: `VERSION.container`"'
+          sh 'git diff --quiet && git diff --staged --quiet || git commit -am "Jenkins Container: `cat VERSION.container`"'
           withCredentials([gitUsernamePassword(credentialsId: 'github-pat', gitToolName: 'git')]) {
             sh 'git diff --quiet && git diff --staged --quiet || git push origin main'
           }
