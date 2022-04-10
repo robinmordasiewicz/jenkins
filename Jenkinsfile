@@ -1,6 +1,7 @@
 pipeline {
   options {
     disableConcurrentBuilds()
+    skipDefaultCheckout(true)
   }
   agent {
     kubernetes {
@@ -11,7 +12,7 @@ pipeline {
           containers:
           - name: ubuntu
             image: robinhoodis/ubuntu:latest
-            imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
             command:
             - cat
             tty: true
@@ -36,13 +37,57 @@ pipeline {
     }
   }
   stages {
-    stage('build container') {
+    stage('INIT') {
+      steps {
+        cleanWs()
+        checkout scm
+      }
+    }
+    stage('Increment VERSION') {
+      when {
+        beforeAgent true
+        anyOf {
+          changeset "Dockerfile"
+          triggeredBy cause: 'UserIdCause'
+        }
+      }
+      steps {
+        container('ubuntu') {
+          sh 'sh increment-version.sh'
+        }
+      }
+    }
+    stage('Check repo for container') {
+      when {
+        beforeAgent true
+        anyOf {
+          changeset "VERSION"
+          changeset "Dockerfile"
+          triggeredBy cause: 'UserIdCause'
+        }
+      }
+      steps {
+        container('ubuntu') {
+          sh 'skopeo inspect docker://docker.io/robinhoodis/ubuntu:`cat VERSION` > /dev/null || echo "create new container: `cat VERSION`" > BUILDNEWCONTAINER.txt'
+        }
+      }
+    }
+    stage('Build/Push Container') {
+      when {
+        beforeAgent true
+        anyOf {
+          changeset "VERSION"
+          changeset "Dockerfile"
+          triggeredBy cause: 'UserIdCause'
+        }
+      }
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
           script {
-            sh '''
-            /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                             --context `pwd` \
+            sh ''' 
+            [ ! -f BUILDNEWCONTAINER.txt ] || \
+            /kaniko/executor --dockerfile=Dockerfile \
+                             --context=git://github.com/robinmordasiewicz/jenkins.git \
                              --destination=robinhoodis/jenkins:`cat VERSION` \
                              --destination=robinhoodis/jenkins:latest \
                              --cache=true
@@ -51,33 +96,36 @@ pipeline {
         }
       }
     }
-    stage('commit chart') {
-      steps {
-        sh 'mkdir -p helm-charts'
-        dir ( 'helm-charts' ) {
-          git branch: 'main', url: 'https://github.com/robinmordasiewicz/helm-charts.git'
+    stage('Commit new VERSION') {
+      when {
+        beforeAgent true
+        anyOf {
+          changeset "Dockerfile"
+          triggeredBy cause: 'UserIdCause'
         }
-        sh 'cp VERSION helm-charts/VERSION.container'
-        dir ( 'helm-charts' ) {
-          sh 'git config user.email "robin@mordasiewicz.com"'
-          sh 'git config user.name "Robin Mordasiewicz"'
-          sh 'git add .'
-          sh 'git diff --quiet && git diff --staged --quiet || git commit -am "Jenkins Container: `cat VERSION.container`"'
-          withCredentials([gitUsernamePassword(credentialsId: 'github-pat', gitToolName: 'git')]) {
-            sh 'git diff --quiet && git diff --staged --quiet || git push origin main'
-          }
+      }
+      steps {
+        sh 'git config user.email "robin@mordasiewicz.com"'
+        sh 'git config user.name "Robin Mordasiewicz"'
+        // sh 'git add -u'
+        // sh 'git diff --quiet && git diff --staged --quiet || git commit -m "`cat VERSION`"'
+        sh 'git add . && git diff --staged --quiet || git commit -m "`cat VERSION`"'
+        withCredentials([gitUsernamePassword(credentialsId: 'github-pat', gitToolName: 'git')]) {
+          // sh 'git diff --quiet && git diff --staged --quiet || git push origin HEAD:main'
+          // sh 'git diff --quiet HEAD || git push origin HEAD:main'
+          sh 'git push origin HEAD:main'
         }
       }
     }
   }
-//  post {
-//    always {
-//      cleanWs(cleanWhenNotBuilt: false,
-//            deleteDirs: true,
-//            disableDeferredWipeout: true,
-//            notFailBuild: true,
-//            patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
-//                     [pattern: '.propsfile', type: 'EXCLUDE']])
-//    }
-//  }
+  post {
+    always {
+      cleanWs(cleanWhenNotBuilt: false,
+            deleteDirs: true,
+            disableDeferredWipeout: true,
+            notFailBuild: true,
+            patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
+                       [pattern: '.propsfile', type: 'EXCLUDE']])
+    }
+  }
 }
