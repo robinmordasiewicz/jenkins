@@ -39,6 +39,8 @@ pipeline {
   stages {
     stage('INIT') {
       steps {
+        def upstream_project = "${currentBuild.getBuildCauses()[0].upstreamProject}"
+        echo "Build Caused by ${upstream_project}"
         cleanWs()
         checkout scm
       }
