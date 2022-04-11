@@ -49,8 +49,7 @@ pipeline {
         anyOf {
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
-          triggeredBy 'UpstreamCause'
-          triggeredBy 'BuildUpstreamCause'
+          triggeredBy cause: 'UpstreamCause'
         }
       }
       steps {
@@ -67,8 +66,7 @@ pipeline {
           changeset "VERSION"
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
-          triggeredBy 'UpstreamCause'
-          triggeredBy 'BuildUpstreamCause'
+          triggeredBy cause: 'UpstreamCause'
         }
       }
       steps {
@@ -84,8 +82,7 @@ pipeline {
           changeset "VERSION"
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
-          triggeredBy 'BuildUpstreamCause'
-          triggeredBy 'UpstreamCause'
+          triggeredBy cause: 'UpstreamCause'
         }
       }
       steps {
@@ -109,7 +106,7 @@ pipeline {
         anyOf {
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
-          triggeredBy 'BuildUpstreamCause'
+          triggeredBy cause: 'UpstreamCause'
         }
       }
       steps {
