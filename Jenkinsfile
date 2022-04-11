@@ -50,9 +50,13 @@ pipeline {
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
           triggeredBy 'BuildUpstreamCause'
+          triggeredBy cause: 'BuildUpstreamCause'
+          triggeredBy cause: 'UpstreamCause'
+          triggeredBy cause: 'upstreamBuilds'
         }
       }
       steps {
+        sh 'echo "----------------------------------"'
         container('ubuntu') {
           sh 'sh increment-version.sh'
         }
