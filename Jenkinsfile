@@ -39,10 +39,6 @@ pipeline {
   stages {
     stage('INIT') {
       steps {
-        script {
-          def upstream_project = "${currentBuild.getBuildCauses()[0].upstreamProject}"
-          echo "Build Caused by ${upstream_project}"
-        }
         cleanWs()
         checkout scm
       }
@@ -53,10 +49,7 @@ pipeline {
         anyOf {
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
-          triggeredBy 'BuildUpstreamCause'
-          triggeredBy cause: 'BuildUpstreamCause'
-          triggeredBy cause: 'UpstreamCause'
-          triggeredBy cause: 'upstreamBuilds'
+          triggeredBy 'UpstreamCause'
         }
       }
       steps {
@@ -90,6 +83,7 @@ pipeline {
           changeset "Dockerfile"
           triggeredBy cause: 'UserIdCause'
           triggeredBy 'BuildUpstreamCause'
+          triggeredBy 'UpstreamCause'
         }
       }
       steps {
