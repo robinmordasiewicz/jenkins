@@ -91,7 +91,7 @@ pipeline {
             sh ''' 
             [ ! -f BUILDNEWCONTAINER.txt ] || \
             /kaniko/executor --dockerfile=Dockerfile \
-                             --context=git://github.com/robinmordasiewicz/jenkins.git \
+                             --context=`pwd` \
                              --destination=robinhoodis/jenkins:`cat VERSION` \
                              --destination=robinhoodis/jenkins:latest \
                              --cache=true
