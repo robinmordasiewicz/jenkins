@@ -46,10 +46,12 @@ pipeline {
     stage('Increment VERSION') {
       when {
         beforeAgent true
-        anyOf {
-          changeset "Dockerfile"
-          triggeredBy cause: 'UserIdCause'
-          triggeredBy cause: 'UpstreamCause'
+        allOf {
+          anyOf {
+            changeset "Dockerfile"
+            changeset "plugins.txt"
+          }
+          not {changeset "VERSION"}
         }
       }
       steps {
@@ -59,37 +61,19 @@ pipeline {
         }
       }
     }
-    stage('Check repo for container') {
-      when {
-        beforeAgent true
-        anyOf {
-          changeset "VERSION"
-          changeset "Dockerfile"
-          triggeredBy cause: 'UserIdCause'
-          triggeredBy cause: 'UpstreamCause'
-        }
-      }
-      steps {
-        container('ubuntu') {
-          sh 'skopeo inspect docker://docker.io/robinhoodis/ubuntu:`cat VERSION` > /dev/null || echo "create new container: `cat VERSION`" > BUILDNEWCONTAINER.txt'
-        }
-      }
-    }
     stage('Build/Push Container') {
       when {
         beforeAgent true
-        anyOf {
-          changeset "VERSION"
-          changeset "Dockerfile"
-          triggeredBy cause: 'UserIdCause'
-          triggeredBy cause: 'UpstreamCause'
+        expression {
+          container('ubuntu') {
+            sh(returnStatus: true, script: 'skopeo inspect docker://docker.io/robinhoodis/jenkins:`cat VERSION`') == 1
+          }
         }
       }
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
           script {
             sh ''' 
-            [ ! -f BUILDNEWCONTAINER.txt ] || \
             /kaniko/executor --dockerfile=Dockerfile \
                              --context=`pwd` \
                              --destination=robinhoodis/jenkins:`cat VERSION` \
