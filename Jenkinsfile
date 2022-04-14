@@ -55,7 +55,6 @@ pipeline {
         }
       }
       steps {
-        sh 'echo "----------------------------------"'
         container('ubuntu') {
           sh 'sh increment-version.sh'
         }
@@ -87,10 +86,12 @@ pipeline {
     stage('Commit new VERSION') {
       when {
         beforeAgent true
-        anyOf {
-          changeset "Dockerfile"
-          triggeredBy cause: 'UserIdCause'
-          triggeredBy cause: 'UpstreamCause'
+        allOf {
+          anyOf {
+            changeset "Dockerfile"
+            changeset "plugins.txt"
+          }
+          not {changeset "VERSION"}
         }
       }
       steps {
@@ -102,7 +103,7 @@ pipeline {
         withCredentials([gitUsernamePassword(credentialsId: 'github-pat', gitToolName: 'git')]) {
           // sh 'git diff --quiet && git diff --staged --quiet || git push origin HEAD:main'
           // sh 'git diff --quiet HEAD || git push origin HEAD:main'
-          sh 'git push origin main'
+          sh 'git push origin HEAD:main'
         }
       }
     }
