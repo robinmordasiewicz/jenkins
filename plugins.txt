@@ -1,5 +1,6 @@
 ansicolor:latest
 ant:latest
+blueocean:latest
 build-timeout:latest
 cloudbees-folder:latest
 command-launcher:1.6
@@ -11,7 +12,7 @@ git:latest
 github-branch-source:latest
 gradle:latest
 groovy:latest
-jaxb:2.3.0.1
+jaxb:latest
 jdk-tool:1.5
 job-dsl:latest
 kubernetes-cli:latest
