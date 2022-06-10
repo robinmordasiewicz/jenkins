@@ -30,5 +30,6 @@ script-security:latest
 ssh-slaves:latest
 timestamper:latest
 workflow-aggregator:latest
+workflow-cps:latest
 workflow-job:latest
 ws-cleanup:latest
